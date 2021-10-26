@@ -28,6 +28,21 @@ def find_split(data):
 
     return best_split_value, best_split_feature
 
+
+def split_dataset_by_split_point(dataset, attribute, value):
+    """ Helper function to split a dataset by a specified split point.
+
+    :param dataset:
+    :param attribute:
+    :param value:
+    :return:
+    """
+    sorted_dataset = dataset[np.argsort(dataset[:, attribute])]
+    right_dataset = sorted_dataset[np.where(sorted_dataset[:,attribute] > value)[0]]
+    left_dataset = sorted_dataset[np.where(sorted_dataset[:, attribute] < value)[0]]
+    return left_dataset, right_dataset
+
+
 def information_entropy(label_column):
     """
     TODO
@@ -53,3 +68,55 @@ def information_gain(left_child_label_column, right_child_label_column, parent_l
     proportion_right_child = len(right_child_label_column) / length_parent
 
     return parent_entropy - proportion_left_child * left_child_entropy - proportion_right_child * right_child_entropy
+
+
+def is_pure_node(dataset):
+    return len(np.unique(dataset[:, -1])) == 1
+
+
+class Node:
+    def __init__(self, attribute, value, left=None, right=None, is_leaf=True):
+        self.attribute = attribute
+        self.value = value
+        self.left = left
+        self.right = right
+        self.is_leaf = is_leaf
+
+    # def is_leaf(self):
+    #     return self.left is None and self.right is None
+
+    def create(self):
+        branch_dict = {'attribute': self.attribute,
+                       'value': self.value,
+                       'left': self.left,
+                       'right': self.right,
+                       'leaf': self.is_leaf}
+        return branch_dict
+
+    def __repr__(self):
+        return f"Line({self.attribute}, {self.value},{self.left}, {self.right} )"
+
+
+class DecisionTreeBuilder:
+
+    def build(self, dataset, depth):
+        attribute = None
+        value = None
+        if is_pure_node(dataset):
+            print('pure')
+            return Node(attribute, value), depth
+        else:
+            print(' splitting...')
+            value, attribute = find_split(dataset)  # returns best_split_value and best_split_feature
+            print(value, attribute)
+            print('start to make a node,')
+            node = Node(attribute, value)
+            print(node)
+            left_dataset, right_dataset = split_dataset_by_split_point(dataset, attribute, value)
+            print(np.shape(left_dataset), np.shape(right_dataset))
+
+            node.left, l_depth = self.build(left_dataset, depth+1)
+            print('left ds: ', node.left, l_depth)
+            node.right, r_depth = self.build(right_dataset, depth+1)
+            print('left ds: ', node.right, r_depth )
+            return node, max(l_depth, r_depth)
