@@ -13,10 +13,10 @@ def find_split(data):
         split_points = {}
         sorted_data = data[np.argsort(data[:, feature])]  # TODO check this actually sorts the other columns properly
         for example in range(num_examples - 1):
-            if sorted_data[example, -1] != sorted_data[example + 1, -1] and sorted_data[example, feature] != sorted_data[example+1, feature]:
+            if sorted_data[example, feature] != sorted_data[example+1, feature]:
                 left_child_label_column = sorted_data[0:(example + 1), -1]
                 right_child_label_column = sorted_data[(example + 1):, -1]
-                split_value = np.mean(sorted_data[example:example+1, feature])
+                split_value = np.mean(sorted_data[example:example+2, feature])
                 split_points[split_value] = information_gain(left_child_label_column, right_child_label_column, data[:, -1])
         # Return key (i.e. split value) for the maximum information gain
         feature_best_split_value = max(split_points, key=split_points.get)
@@ -38,7 +38,7 @@ def split_dataset_by_split_point(dataset, attribute, value):
     :return:
     """
     sorted_dataset = dataset[np.argsort(dataset[:, attribute])]
-    right_dataset = sorted_dataset[np.where(sorted_dataset[:,attribute] > value)[0]]
+    right_dataset = sorted_dataset[np.where(sorted_dataset[:, attribute] > value)[0]]
     left_dataset = sorted_dataset[np.where(sorted_dataset[:, attribute] < value)[0]]
     return left_dataset, right_dataset
 
@@ -71,7 +71,13 @@ def information_gain(left_child_label_column, right_child_label_column, parent_l
 
 
 def is_pure_node(dataset):
-    return len(np.unique(dataset[:, -1])) == 1
+    """Implement stopping condition if either all labels in a dataset are the same, or if there are no examples
+    in the dataset.
+
+    :param dataset:
+    :return:
+    """
+    return len(np.unique(dataset[:, -1])) == 1 or dataset[:, :-1].std(axis=0).sum() == 0
 
 
 class Node:
@@ -94,7 +100,7 @@ class Node:
         return branch_dict
 
     def __repr__(self):
-        return f"Line({self.attribute}, {self.value},{self.left}, {self.right} )"
+        return f"Node({self.attribute}, {self.value},{self.left}, {self.right} )"
 
 
 class DecisionTreeBuilder:
@@ -118,5 +124,7 @@ class DecisionTreeBuilder:
             node.left, l_depth = self.build(left_dataset, depth+1)
             print('left ds: ', node.left, l_depth)
             node.right, r_depth = self.build(right_dataset, depth+1)
-            print('left ds: ', node.right, r_depth )
+            print('left ds: ', node.right, r_depth)
             return node, max(l_depth, r_depth)
+
+a= np.array([[1,2,1,3],[1,2,1,3]])
