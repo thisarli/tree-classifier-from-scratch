@@ -19,8 +19,11 @@ def find_split(data):
                 split_value = np.mean(sorted_data[example:example+2, feature])
                 split_points[split_value] = information_gain(left_child_label_column, right_child_label_column, data[:, -1])
         # Return key (i.e. split value) for the maximum information gain
-        feature_best_split_value = max(split_points, key=split_points.get)
-        best_splits_for_each_feature.append([feature_best_split_value, split_points[feature_best_split_value]])
+        try:
+            feature_best_split_value = max(split_points, key=split_points.get)
+            best_splits_for_each_feature.append([feature_best_split_value, split_points[feature_best_split_value]])
+        except ValueError:
+            continue
 
     # Find the feature with best split value
     best_split_feature = np.argmax([split_point[1] for split_point in best_splits_for_each_feature])
@@ -126,5 +129,3 @@ class DecisionTreeBuilder:
             node.right, r_depth = self.build(right_dataset, depth+1)
             print('left ds: ', node.right, r_depth)
             return node, max(l_depth, r_depth)
-
-a= np.array([[1,2,1,3],[1,2,1,3]])
