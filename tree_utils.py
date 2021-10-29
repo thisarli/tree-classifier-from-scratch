@@ -12,13 +12,15 @@ def find_split(data):
         # Dictionary to hold split points as key and information gain as values
         split_points = {}
         sorted_data = data[np.argsort(data[:, feature])]  # TODO check this actually sorts the other columns properly
-        for example in range(num_examples - 1):
-            if sorted_data[example, feature] != sorted_data[example+1, feature]:
-                left_child_label_column = sorted_data[0:(example + 1), -1]
-                right_child_label_column = sorted_data[(example + 1):, -1]
-                split_value = np.mean(sorted_data[example:example+2, feature])
-                split_points[split_value] = information_gain(left_child_label_column, right_child_label_column, data[:, -1])
-        # Return key (i.e. split value) for the maximum information gain
+        spitting_indices = [index for index in range(len(sorted_data[:, 0])) if
+                            sorted_data[index, feature] != sorted_data[index - 1, feature]][1:]
+        for split_index in spitting_indices:
+            left_label = sorted_data[0:split_index, -1]
+            right_label = sorted_data[split_index:, -1]
+            split_value = np.mean(sorted_data[split_index - 1:split_index + 1, feature])
+            print('sorted_data: ', sorted_data)
+            print('split_value: ', split_value)
+            split_points[split_value] = information_gain(left_label, right_label, data[:, -1])
         try:
             feature_best_split_value = max(split_points, key=split_points.get)
             best_splits_for_each_feature.append([feature_best_split_value, split_points[feature_best_split_value]])
@@ -80,16 +82,19 @@ def is_pure_node(dataset):
     :param dataset:
     :return:
     """
-    return len(np.unique(dataset[:, -1])) == 1 or dataset[:, :-1].std(axis=0).sum() == 0
+    is_pure = len(np.unique(dataset[:, -1])) == 1 or dataset[:, :-1].std(axis=0).sum() == 0
+    label = int(np.unique(dataset[:, -1])[0])
+    return is_pure, label
 
 
 class Node:
-    def __init__(self, attribute, value, left=None, right=None, is_leaf=True):
+    def __init__(self, attribute, value, left=None, right=None, is_leaf=True, label=None):
         self.attribute = attribute
         self.value = value
         self.left = left
         self.right = right
         self.is_leaf = is_leaf
+        self.label = label
 
     # def is_leaf(self):
     #     return self.left is None and self.right is None
@@ -98,12 +103,13 @@ class Node:
         branch_dict = {'attribute': self.attribute,
                        'value': self.value,
                        'left': self.left,
-                       'right': self.right,
-                       'leaf': self.is_leaf}
+                       'right': self.right}
+                       # 'leaf': self.is_leaf
+
         return branch_dict
 
     def __repr__(self):
-        return f"Node({self.attribute}, {self.value},{self.left}, {self.right} )"
+        return f"Node({self.attribute}, {self.value}, {self.left}, {self.right}, {self.label} )"
 
 
 class DecisionTreeBuilder:
@@ -111,9 +117,10 @@ class DecisionTreeBuilder:
     def build(self, dataset, depth):
         attribute = None
         value = None
-        if is_pure_node(dataset):
+        if is_pure_node(dataset)[0]:
             print('pure')
-            return Node(attribute, value), depth
+            label = is_pure_node(dataset)[1]
+            return Node(attribute, value, label=label), depth
         else:
             print(' splitting...')
             value, attribute = find_split(dataset)  # returns best_split_value and best_split_feature

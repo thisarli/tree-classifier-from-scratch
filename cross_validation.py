@@ -62,24 +62,46 @@ def train_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
 
     return folds
 
+def predict(instance, tree):
+    node = tree
+    while node.label is None:
+        attribute = node.attribute
+        value = node.value
+        if instance[attribute] < value:
+            node = node.left
+            print('left node', node)
+            label = predict(instance, node)
+            print('left label:', label)
+        else:
+            node = node.right
+            print('right node:', node)
+            label = predict(instance, node)
+            print('right node:', node)
+    return label
+
+# def traverse(x_test, tree):
+#
+#     for instance in x_test:
+#
+#
+#
+#     return y_pred
+
+
 
 # Running the validation
 
 def run_simple_cross_validation(n_folds, data, rg=default_rng()):
     accuracies = np.zeros((n_folds, ))
-    x, y = split_dataset_x_y(data)
     for i, (train_indices, test_indices) in enumerate(train_test_k_fold(n_folds, len(data), rg)):
         # get the dataset from the correct splits
-        x_train = [train_indices, :]
-        y_train = y[train_indices]
-        x_test = x[test_indices, :]
-        y_test = y[test_indices]
-
+        train = data[train_indices, :]
+        test = data[test_indices, :]
         # Train the KNN (we'll use one nearest neighbour)
         tree_classifier = DecisionTreeBuilder()
-        tree_classifier.build(x_train, y_train)
+        tree_classifier.build(train, 0)
         predictions = knn_classifier.predict(x_test)
-        acc = accuracy(y_test, predictions)
+        acc = accuracy(test[:, -1], predictions)
         accuracies[i] = acc
 
     print(accuracies)
