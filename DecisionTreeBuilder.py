@@ -174,16 +174,3 @@ class DecisionTreeBuilder:
 
         return f
 
-
-# tree = DecisionTreeBuilder()
-# model, depth = tree.build(data)
-#
-# # Enter root node
-# nodes_to_process = [model]
-# tree_dict
-#
-# while nodes_to_process:
-#     # Get neighbors of current node and append to nodes_to_process list
-#     nodes_to_process.append(nodes_to_process[0].left)
-#     nodes_to_process.append(nodes_to_process[0].right)
-

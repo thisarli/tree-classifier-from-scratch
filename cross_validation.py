@@ -1,11 +1,10 @@
 import numpy as np
-from numpy.random import default_rng
 
 from DecisionTreeBuilder import DecisionTreeBuilder
 from tree_utils import train_test_k_fold
 
 
-def run_simple_cross_validation(n_folds, data, rg=default_rng()):
+def run_simple_cross_validation(n_folds, data):
     accuracies = []
     confusion_matrices = []
     precisions = []

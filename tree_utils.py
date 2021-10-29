@@ -1,3 +1,5 @@
+import copy
+
 import matplotlib as plt
 import numpy as np
 from numpy.random import default_rng
@@ -165,3 +167,34 @@ def traverse(instance, tree):
             node = node.right
             label = traverse(instance, node)
     return label
+
+
+def get_node_dict_from_tree(tree):
+    """
+    Retrieves a dictionary of nodes from a tree, i.e. a trained model, or output from .build() method
+    in DecisionTreeBuilder class
+    """
+    nodes_to_process = [copy.deepcopy(tree)]
+    node_dict = {}
+
+    while nodes_to_process:
+        # Get neighbors of current node and append to nodes_to_process list
+        active_node = nodes_to_process[0]
+        if active_node.label is None:
+            nodes_to_process.append(active_node.left)
+            nodes_to_process.append(active_node.right)
+
+            node_dict.update({active_node.id: active_node})
+            node_dict[active_node.id].left = active_node.left.id
+            node_dict[active_node.id].right = active_node.right.id
+
+        else:
+            node_dict.update({active_node.id: active_node})
+        # if active_node.label is None:
+        #     list_of_trees.append({'id': active_node.id, 'attribute': active_node.attribute, 'value': active_node.value,
+        #                           'left': active_node.left.id, 'right': active_node.right.id})
+        # else:
+        #     list_of_trees.append({'id': active_node.id, 'attribute': active_node.attribute, 'value': active_node.value,
+        #                           'left': None, 'right': None})
+        nodes_to_process.pop(0)
+    return node_dict

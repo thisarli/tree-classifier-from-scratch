@@ -21,5 +21,5 @@ class Node:
         return branch_dict
 
     def __repr__(self):
-        return f"Node({self.attribute}, {self.attribute}, {self.value}, {self.left}, {self.right}, {self.label} )"
+        return f"Node({self.id}, {self.attribute}, {self.value}, {self.left}, {self.right}, {self.label} )"
 
