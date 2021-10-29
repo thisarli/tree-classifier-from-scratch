@@ -1,12 +1,12 @@
-import matplotlib as plt
-import numpy as np
+from cross_validation import run_simple_cross_validation
+from data_utils import load_dataset
 
-from data_utils import load_dataset, split_dataset_x_y
+N_FOLDS = 10
 
 
 def run_wifi_localisation():
     data = load_dataset("data/clean_dataset.txt")
-    x, y = split_dataset_x_y(data)
+    run_simple_cross_validation(N_FOLDS, data)
     pass
 
 
