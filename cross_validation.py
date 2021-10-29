@@ -62,47 +62,43 @@ def train_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
 
     return folds
 
-def predict(instance, tree):
+def traverse(instance, tree):
     node = tree
+    label = node.label
     while node.label is None:
         attribute = node.attribute
         value = node.value
         if instance[attribute] < value:
             node = node.left
-            print('left node', node)
-            label = predict(instance, node)
-            print('left label:', label)
+            label = traverse(instance, node)
         else:
             node = node.right
-            print('right node:', node)
-            label = predict(instance, node)
-            print('right node:', node)
+            label = traverse(instance, node)
     return label
 
-# def traverse(x_test, tree):
-#
-#     for instance in x_test:
-#
-#
-#
-#     return y_pred
-
+def predict(x_test, tree):
+    y_pred = []
+    for instance in x_test:
+        y_pred.append(traverse(instance, tree))
+    return np.array(y_pred)
 
 
 # Running the validation
 
-def run_simple_cross_validation(n_folds, data, rg=default_rng()):
+def run_simple_cross_validation(n_folds, data, rg=default_rng()): # TODO make this work
     accuracies = np.zeros((n_folds, ))
     for i, (train_indices, test_indices) in enumerate(train_test_k_fold(n_folds, len(data), rg)):
+        print(f'------------{i}--------')
         # get the dataset from the correct splits
         train = data[train_indices, :]
         test = data[test_indices, :]
         # Train the KNN (we'll use one nearest neighbour)
         tree_classifier = DecisionTreeBuilder()
-        tree_classifier.build(train, 0)
-        predictions = knn_classifier.predict(x_test)
-        acc = accuracy(test[:, -1], predictions)
-        accuracies[i] = acc
+        model = tree_classifier.build(train, 0)
+        predictions = predict(test[:, :-1], model[0])
+        #acc = accuracy(test[:, :-1], predictions)
+        #accuracies[i] = acc
+    return predictions
 
     print(accuracies)
     print(accuracies.mean())

@@ -18,8 +18,8 @@ def find_split(data):
             left_label = sorted_data[0:split_index, -1]
             right_label = sorted_data[split_index:, -1]
             split_value = np.mean(sorted_data[split_index - 1:split_index + 1, feature])
-            print('sorted_data: ', sorted_data)
-            print('split_value: ', split_value)
+            # print('sorted_data: ', sorted_data)
+            # print('split_value: ', split_value)
             split_points[split_value] = information_gain(left_label, right_label, data[:, -1])
         try:
             feature_best_split_value = max(split_points, key=split_points.get)
