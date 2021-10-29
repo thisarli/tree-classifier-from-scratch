@@ -8,16 +8,19 @@ from tree_utils import is_pure_node, find_split, split_dataset_by_split_point, t
 class DecisionTreeBuilder:
     def __init__(self, random_generator=default_rng()):
         self.random_generator = random_generator
+        self.id_counter = 0
 
     def build(self, dataset, depth=0):
         attribute = None
         value = None
         if is_pure_node(dataset)[0]:
             label = is_pure_node(dataset)[1]
-            return Node(attribute, value, label=label), depth
+            self.id_counter += 1
+            return Node(self.id_counter, attribute, value, label=label), depth
         else:
             value, attribute = find_split(dataset)  # returns best_split_value and best_split_feature
-            node = Node(attribute, value)
+            self.id_counter += 1
+            node = Node(self.id_counter, attribute, value)
             left_dataset, right_dataset = split_dataset_by_split_point(dataset, attribute, value)
             node.left, l_depth = self.build(left_dataset, depth+1)
             node.right, r_depth = self.build(right_dataset, depth+1)
@@ -172,15 +175,15 @@ class DecisionTreeBuilder:
         return f
 
 
-tree = DecisionTreeBuilder()
-model, depth = tree.build(data)
-
-# Enter root node
-nodes_to_process = [model]
-tree_dict
-
-while nodes_to_process:
-    # Get neighbors of current node and append to nodes_to_process list
-    nodes_to_process.append(nodes_to_process[0].left)
-    nodes_to_process.append(nodes_to_process[0].right)
+# tree = DecisionTreeBuilder()
+# model, depth = tree.build(data)
+#
+# # Enter root node
+# nodes_to_process = [model]
+# tree_dict
+#
+# while nodes_to_process:
+#     # Get neighbors of current node and append to nodes_to_process list
+#     nodes_to_process.append(nodes_to_process[0].left)
+#     nodes_to_process.append(nodes_to_process[0].right)
 

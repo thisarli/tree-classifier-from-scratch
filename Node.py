@@ -1,5 +1,6 @@
 class Node:
-    def __init__(self, attribute, value, left=None, right=None, is_leaf=True, label=None):
+    def __init__(self, id, attribute, value, left=None, right=None, is_leaf=True, label=None):
+        self.id = id
         self.attribute = attribute
         self.value = value
         self.left = left
@@ -20,5 +21,5 @@ class Node:
         return branch_dict
 
     def __repr__(self):
-        return f"Node({self.attribute}, {self.value}, {self.left}, {self.right}, {self.label} )"
+        return f"Node({self.attribute}, {self.attribute}, {self.value}, {self.left}, {self.right}, {self.label} )"
 
