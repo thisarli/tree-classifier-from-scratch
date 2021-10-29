@@ -12,20 +12,21 @@ def find_split(data):
         # Dictionary to hold split points as key and information gain as values
         split_points = {}
         sorted_data = data[np.argsort(data[:, feature])]  # TODO check this actually sorts the other columns properly
-        spitting_indices = [index for index in range(len(sorted_data[:, 0])) if
-                            sorted_data[index, feature] != sorted_data[index - 1, feature]][1:]
-        for split_index in spitting_indices:
-            left_label = sorted_data[0:split_index, -1]
-            right_label = sorted_data[split_index:, -1]
-            split_value = np.mean(sorted_data[split_index - 1:split_index + 1, feature])
-            # print('sorted_data: ', sorted_data)
-            # print('split_value: ', split_value)
-            split_points[split_value] = information_gain(left_label, right_label, data[:, -1])
-        try:
-            feature_best_split_value = max(split_points, key=split_points.get)
-            best_splits_for_each_feature.append([feature_best_split_value, split_points[feature_best_split_value]])
-        except ValueError:
-            continue
+        if len(np.unique(sorted_data[:, feature])) == 1: # if all values in this features are the same
+            # the split point will be at the beginning or the end of the sorted dataset 
+            # will result in a 0 information gain
+            split_points[sorted_data[0, feature]] = 0 
+        else:
+            spitting_indices = [index for index in range(len(sorted_data[:,0])) if sorted_data[index, feature] != sorted_data[index-1, feature]][1:]
+            for split_index in spitting_indices:
+                left_label = sorted_data[0:(split_index), -1]
+                right_label = sorted_data[(split_index):, -1]
+                split_value = np.mean(sorted_data[split_index-1:split_index+1, feature])
+                split_points[split_value] = information_gain(left_label, right_label, data[:, -1])
+                
+        # Return key (i.e. split value) for the maximum information gain
+        feature_best_split_value = max(split_points, key=split_points.get)
+        best_splits_for_each_feature.append([feature_best_split_value, split_points[feature_best_split_value]])
 
     # Find the feature with best split value
     best_split_feature = np.argmax([split_point[1] for split_point in best_splits_for_each_feature])
@@ -82,8 +83,17 @@ def is_pure_node(dataset):
     :param dataset:
     :return:
     """
-    is_pure = len(np.unique(dataset[:, -1])) == 1 or dataset[:, :-1].std(axis=0).sum() == 0
-    label = int(np.unique(dataset[:, -1])[0])
+    is_pure = False
+    label = None
+    label_types, counts = np.unique(dataset[:, -1], return_counts=True)
+    if len(label_types) == 1 :
+        is_pure = True
+        label = int(label_types[0])
+    else:
+        if dataset[:, :-1].std(axis=0).sum() == 0:
+            label = int(label_types[np.argmax(counts)])
+            is_pure = True
+    
     return is_pure, label
 
 
@@ -118,21 +128,13 @@ class DecisionTreeBuilder:
         attribute = None
         value = None
         if is_pure_node(dataset)[0]:
-            print('pure')
             label = is_pure_node(dataset)[1]
             return Node(attribute, value, label=label), depth
         else:
-            print(' splitting...')
             value, attribute = find_split(dataset)  # returns best_split_value and best_split_feature
-            print(value, attribute)
-            print('start to make a node,')
             node = Node(attribute, value)
-            print(node)
             left_dataset, right_dataset = split_dataset_by_split_point(dataset, attribute, value)
-            print(np.shape(left_dataset), np.shape(right_dataset))
 
             node.left, l_depth = self.build(left_dataset, depth+1)
-            print('left ds: ', node.left, l_depth)
             node.right, r_depth = self.build(right_dataset, depth+1)
-            print('left ds: ', node.right, r_depth)
             return node, max(l_depth, r_depth)

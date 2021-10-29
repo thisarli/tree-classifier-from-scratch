@@ -28,7 +28,7 @@ def k_fold_split(n_splits, n_instances, random_generator=default_rng()):
 
 # # For quick testing
 # k_fold_split(3, 20, rg)
-k_fold_split(10, np.shape(data)[0], random_generator=default_rng())
+#k_fold_split(10, np.shape(data)[0], random_generator=default_rng())
 
 
 def train_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
@@ -83,10 +83,26 @@ def predict(x_test, tree):
     return np.array(y_pred)
 
 
+def accuracy(y_test, y_pred):
+    """ Compute the accuracy given the ground truth and predictions
+
+    Args:
+        y_gold (np.ndarray): the correct ground truth/gold standard labels
+        y_prediction (np.ndarray): the predicted labels
+
+    Returns:
+        float : the accuracy
+    """
+
+    assert len(y_test) == len(y_pred)  
+    
+    return np.sum(y_test == y_pred) / len(y_test)
+    
+
 # Running the validation
 
 def run_simple_cross_validation(n_folds, data, rg=default_rng()): # TODO make this work
-    accuracies = np.zeros((n_folds, ))
+    accuracies = []
     for i, (train_indices, test_indices) in enumerate(train_test_k_fold(n_folds, len(data), rg)):
         print(f'------------{i}--------')
         # get the dataset from the correct splits
@@ -95,11 +111,8 @@ def run_simple_cross_validation(n_folds, data, rg=default_rng()): # TODO make th
         # Train the KNN (we'll use one nearest neighbour)
         tree_classifier = DecisionTreeBuilder()
         model = tree_classifier.build(train, 0)
-        predictions = predict(test[:, :-1], model[0])
-        #acc = accuracy(test[:, :-1], predictions)
-        #accuracies[i] = acc
-    return predictions
-
-    print(accuracies)
-    print(accuracies.mean())
-    print(accuracies.std())
+        y_test = test[:, -1]
+        y_pred = predict(test[:, :-1], model[0])
+        acc = accuracy(y_test, y_pred)
+        accuracies += [acc]
+    return np.array(accuracies)
