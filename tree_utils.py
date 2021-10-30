@@ -4,6 +4,8 @@ import matplotlib as plt
 import numpy as np
 from numpy.random import default_rng
 
+from Node import Node
+
 
 def find_split(data):
     # Get number of features and examples in data
@@ -202,3 +204,15 @@ def get_node_dict_from_tree(tree):
         #                           'left': None, 'right': None})
         nodes_to_process.pop(0)
     return node_dict
+
+
+def get_tree_from_dict(node_dict, node_id=1):
+    tree = node_dict[node_id]
+    if tree.right == None and tree.left == None:
+        return tree
+    else:
+        tree.left = get_tree_from_dict(node_dict, tree.left)
+        tree.right = get_tree_from_dict(node_dict, tree.right)
+        return tree
+
+
