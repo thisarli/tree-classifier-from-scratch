@@ -90,7 +90,7 @@ def is_pure_node(dataset):
     label = None
     node_count = None
     label_types, counts = np.unique(dataset[:, -1], return_counts=True)
-    label_types = [int(label_type) for label_type in label_types]
+    label_types = np.array([int(label_type) for label_type in label_types])
     if len(label_types) == 1:
         is_pure = True
         label = int(label_types[0])
