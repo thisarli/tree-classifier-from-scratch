@@ -33,7 +33,7 @@ def pruning(tree, validation_set):
       tree[candidate.id].count = None               
     best_candidate = tree[max(pruning_accuracies, key=pruning_accuracies.get)]
 
-    if new_accuracies[best_candidate.id] > orginial_accuracy:
+    if pruning_accuracies[best_candidate.id] > orginial_accuracy:
       #tree[best_candidate.id].label = get_majority_label(tree, best_candidate)
       #tree[best_candidate.id].count = get_total_children_instances(tree, best_candidate) 
       update_to_leaf_node(tree, best_candidate) 
@@ -61,8 +61,8 @@ def update_to_leaf_node(tree, node):
   # count_dict has key:label, value:total instances with this label in the children nodes
   majority_label = max(count_dict, key=count_dict.get)
 
-  tree[best_candidate.id].label =  majority_label
+  tree[node.id].label =  majority_label
   labels = np.array([label for label in count_dict.keys()])
   counts = np.array([count for count in count_dict.values()])
-  tree[best_candidate.id].count = (labels, counts)
+  tree[node.id].count = (labels, counts)
   return
