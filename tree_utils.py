@@ -88,16 +88,20 @@ def is_pure_node(dataset):
     """
     is_pure = False
     label = None
+    node_count = None
     label_types, counts = np.unique(dataset[:, -1], return_counts=True)
-    if len(label_types) == 1 :
+    label_types = [int(label_type) for label_type in label_types]
+    if len(label_types) == 1:
         is_pure = True
         label = int(label_types[0])
+        node_count = [label_types, counts]
     else:
         if dataset[:, :-1].std(axis=0).sum() == 0:
             label = int(label_types[np.argmax(counts)])
             is_pure = True
+            node_count = [label_types, counts]
     
-    return is_pure, label
+    return is_pure, label, node_count
 
 
 def k_fold_split(n_splits, n_instances, random_generator=default_rng()):

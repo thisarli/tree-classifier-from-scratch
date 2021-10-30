@@ -14,9 +14,9 @@ class DecisionTreeBuilder:
         attribute = None
         value = None
         if is_pure_node(dataset)[0]:
-            label = is_pure_node(dataset)[1]
+            _, label, node_count = is_pure_node(dataset)
             self.id_counter += 1
-            return Node(self.id_counter, attribute, value, label=label), depth
+            return Node(self.id_counter, attribute, value, label=label, count=node_count), depth
         else:
             value, attribute = find_split(dataset)  # returns best_split_value and best_split_feature
             self.id_counter += 1
