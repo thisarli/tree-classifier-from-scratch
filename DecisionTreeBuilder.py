@@ -16,11 +16,11 @@ class DecisionTreeBuilder:
         if is_pure_node(dataset)[0]:
             _, label, node_count = is_pure_node(dataset)
             self.id_counter += 1
-            return Node(self.id_counter, attribute, value, label=label, count=node_count), depth
+            return Node(self.id_counter, attribute, value, label=label, count=node_count, depth=depth), depth
         else:
             value, attribute = find_split(dataset)  # returns best_split_value and best_split_feature
             self.id_counter += 1
-            node = Node(self.id_counter, attribute, value)
+            node = Node(self.id_counter, attribute, value, depth=depth)
             left_dataset, right_dataset = split_dataset_by_split_point(dataset, attribute, value)
             node.left, l_depth = self.build(left_dataset, depth+1)
             node.right, r_depth = self.build(right_dataset, depth+1)

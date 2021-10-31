@@ -207,6 +207,7 @@ def get_node_dict_from_tree(tree):
 
 
 def get_tree_from_dict(node_dict, node_id=1):
+    # make a deepcopy before calling the function
     tree = node_dict[node_id]
     if tree.right == None and tree.left == None:
         return tree
