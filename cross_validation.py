@@ -10,7 +10,7 @@ def run_simple_cross_validation(n_folds, data):
     precisions = []
     recalls = []
     f1_scores = []
-    depths= []
+    depths = []
     for i, (train_indices, test_indices) in enumerate(train_test_k_fold(n_folds, len(data))):
         print(f'------------{i}--------')
         # get the dataset from the correct splits
@@ -40,5 +40,5 @@ def run_simple_cross_validation(n_folds, data):
         depths.append(depth)
 
     return np.mean(np.array(accuracies)), np.mean(np.array(confusion_matrices), axis=0), \
-           np.mean(np.array(precisions), axis=0), np.mean(np.array(recalls), axis=0), np.mean(np.array(f1_scores)), \
-           np.mean(depths)
+           np.mean(np.array(precisions), axis=0), np.mean(np.array(recalls), axis=0), \
+           np.mean(np.array(f1_scores), axis=0), np.mean(depths)
