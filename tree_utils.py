@@ -16,7 +16,7 @@ def find_split(data):
     for feature in range(num_features):
         # Dictionary to hold split points as key and information gain as values
         split_points = {}
-        sorted_data = data[np.argsort(data[:, feature])]  # TODO check this actually sorts the other columns properly
+        sorted_data = data[np.argsort(data[:, feature])]
         if len(np.unique(sorted_data[:, feature])) == 1: # if all values in this features are the same
             # the split point will be at the beginning or the end of the sorted dataset 
             # will result in a 0 information gain
@@ -196,18 +196,11 @@ def get_node_dict_from_tree(tree):
 
         else:
             node_dict.update({active_node.id: active_node})
-        # if active_node.label is None:
-        #     list_of_trees.append({'id': active_node.id, 'attribute': active_node.attribute, 'value': active_node.value,
-        #                           'left': active_node.left.id, 'right': active_node.right.id})
-        # else:
-        #     list_of_trees.append({'id': active_node.id, 'attribute': active_node.attribute, 'value': active_node.value,
-        #                           'left': None, 'right': None})
         nodes_to_process.pop(0)
     return node_dict
 
 
 def get_tree_from_dict(node_dict, node_id=1):
-    # make a deepcopy before calling the function
     tree = node_dict[node_id]
     if tree.right == None and tree.left == None:
         return tree

@@ -12,6 +12,7 @@ def run_wifi_localisation():
     print(f"Loaded {filepath} successfully")
 
     # Evaluate the ID3 tree-making algorithm without pruning (Task 3)
+    print("Running the ID3 algorithm...")
     mean_accuracy, mean_cm, mean_precision, mean_recall, mean_f1_score, mean_depth = \
         run_simple_cross_validation(N_FOLDS, data)
     print("Successfully ran ID3 algorithm and evaluation")

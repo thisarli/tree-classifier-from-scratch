@@ -1,7 +1,3 @@
-# tree has been trained on training set
-# function from dictionary to node tree
-
-# This function will be called 10 times within 1 fold (=1 "held-out" test set) so 100 times in total
 import copy
 
 import numpy as np
@@ -18,7 +14,6 @@ def pruning(tree, validation_set):
       validation_set (np.array) including class labels
   """
     tree_copy = copy.deepcopy(tree)
-    print('>>> outer copy')
     node_tree = get_tree_from_dict(tree_copy)
     predictions = predict(validation_set[:, :-1], node_tree)
     labels = validation_set[:, -1]
@@ -26,24 +21,14 @@ def pruning(tree, validation_set):
 
     # the candidates for pruning are the nodes only connected to leaf nodes
     leaves_id = [node_id for node_id in tree if tree[node_id].label is not None]
-    print(leaves_id)
     # Get the parent nodes where both children are leaf nodes (i.e. both children are in leaves_id)
     candidates = [node for node in tree.values() if ((node.left in leaves_id) and (node.right in leaves_id))]
-    print(candidates)
     while len(candidates) > 0:
         pruning_accuracies = {}  # key : id of node where we prune, value: accuracy of pruned tree wrt validation set
 
         for candidate in candidates:
-            print(candidates)
-
-            print(f'>>>>> candidate tree {candidate} ...')
-            # pruning is simulated by assigning majority class label to the candidate
-            # (when we predict the evaluation set on the pruned tree, the DecisionTreeBuilder.traverse() function will stop at this node with a not-None label)
-            # tree[candidate.id].label = get_majority_label(tree, candidate)
-            # tree_copy = copy.deepcopy(tree)
             update_to_leaf_node(tree, candidate)
             tree_copy_can = copy.deepcopy(tree)
-            print('tree_copy_can', tree_copy_can)
             node_tree = get_tree_from_dict(tree_copy_can)
             new_predictions = predict(validation_set[:, :-1], node_tree)  # THIS SUPPOSES THAT tree IS NOW A Node
             pruned_accuracy = accuracy(new_predictions, labels)
@@ -52,19 +37,13 @@ def pruning(tree, validation_set):
             tree[candidate.id].label = None
             tree[candidate.id].count = None
 
-        print('outtttt')
         best_candidate = tree[max(pruning_accuracies, key=pruning_accuracies.get)]
-        print('best_candidate:', best_candidate)
 
         if pruning_accuracies[best_candidate.id] > original_accuracy:
-            print("The candidate accuracy is better than the original")
-            # tree[best_candidate.id].label = get_majority_label(tree, best_candidate)
-            # tree[best_candidate.id].count = get_total_children_instances(tree, best_candidate)
             update_to_leaf_node(tree, best_candidate)
 
             # Update original accuracy to accuracy of pruned tree
             original_accuracy = pruning_accuracies[best_candidate.id]
-            print("we updated the original accuracy")
 
             # Remove children of best_candidate from tree
             del tree[best_candidate.left]
@@ -72,14 +51,9 @@ def pruning(tree, validation_set):
             tree[best_candidate.id].right = None
             tree[best_candidate.id].left = None
 
-            print("we removed the candidates children")
-
             # Update leaves_id and candidates
             leaves_id = [node_id for node_id in tree if tree[node_id].label is not None]
-            print("Find new leafs")
-            print(leaves_id)
             candidates = [node for node in tree.values() if ((node.left in leaves_id) and (node.right in leaves_id))]
-            print('yayyyy we got new candidates', candidates)
         else:
             break
 
@@ -95,6 +69,7 @@ def get_depth(tree):
         if node.depth > max_depth:
             max_depth = node.depth
     return max_depth
+
 
 def update_to_leaf_node(tree, node):
     """
@@ -170,4 +145,5 @@ def nested_cv_for_pruning(dataset, n_fold):
         outer_pruned_depths += [np.mean(inner_pruned_depths)]
         outer_original_accuracies.append(np.mean(inner_original_accuracies))
 
-    return np.mean(outer_original_accuracies), np.mean(outer_pruned_accuracies), np.mean(original_depths), np.mean(outer_pruned_depths)
+    return np.mean(outer_original_accuracies), np.mean(outer_pruned_accuracies), np.mean(original_depths), \
+           np.mean(outer_pruned_depths)

@@ -44,4 +44,3 @@ def split_dataset_x_y(data):
     x = data[:, :-1]
     y = data[:, -1]
     return x, y
-
