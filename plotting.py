@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 from DecisionTreeBuilder import DecisionTreeBuilder
 from data_utils import load_dataset
+from script import FILEPATH
+
 
 def plot_tree(tree):
     plt.figure(figsize = (9,14))
@@ -35,9 +37,7 @@ def plot_binary(node_tree, x=0):
 
 
 if __name__ == "__main__":
-    data = load_dataset("data/noisy_dataset.txt")
+    data = load_dataset(FILEPATH)
     tree_builder = DecisionTreeBuilder()
     tree, max_depth = tree_builder.build(dataset=data)
     plot_tree(tree)
-
-

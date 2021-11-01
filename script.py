@@ -3,13 +3,13 @@ from data_utils import load_dataset
 from nested_cross_validation import nested_cv_for_pruning
 
 N_FOLDS = 10
-filepath = "data/clean_dataset.txt"
+FILEPATH = "data/clean_dataset.txt"
 
 
 def run_wifi_localisation():
     # Load the data
-    data = load_dataset(filepath)
-    print(f"Loaded {filepath} successfully")
+    data = load_dataset(FILEPATH)
+    print(f"Loaded {FILEPATH} successfully")
 
     # Evaluate the ID3 tree-making algorithm without pruning (Task 3)
     print("Running the ID3 algorithm...")
