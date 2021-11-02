@@ -3,7 +3,7 @@ from data_utils import load_dataset
 from nested_cross_validation import nested_cv_for_pruning
 
 N_FOLDS = 10
-FILEPATH = "data/clean_dataset.txt"
+FILEPATH = "data/noisy_dataset.txt"
 
 
 def run_wifi_localisation():

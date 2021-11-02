@@ -1,0 +1,30 @@
+[33ma64e459[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m plotting functions added
+[33m6db8dcc[m Updating readme and script
+[33m42fc50b[m Updating the script
+[33m528ed62[m Debugging nested cross validation and adding depth calculations
+[33m7e3192d[m Cleaning pruning and nested_cv functions
+[33m8acd36a[m pruning and update_to_leaf_node functions
+[33m0308603[m pruning and update_to_leaf_node functions
+[33ma556cc6[m Getting tree from dict
+[33m06d83ee[m Mia does stuff
+[33me8de85b[m Adding label counts to Node class
+[33m37459ab[m Implement function to retrieve dict of nodes for pruning
+[33m6d97542[m Added IDs to nodes
+[33m29fe441[m bla
+[33madc9f07[m Cleaning up the script
+[33mf115f41[m Added gitignore file
+[33mbcf925b[m Refactor up until Task 3
+[33m51dd2c4[m Finish evaluation task 3
+[33me299883[m cross validation done!
+[33m65bc0fe[m more tree stuff
+[33mad992e4[m tree stuff
+[33m5d73bb0[m First steps on Evaluation
+[33md1ac290[m Implemented working tree builder
+[33m57207a3[m Tilman's most recent version
+[33meaa36f7[m Treebuilding
+[33m0829515[m Implemented best_split function
+[33m297b019[m Created tree_utils folder, wrote entropy function and information gain function
+[33m19a5304[m Write data utilities, rename main.py, add script.py file
+[33m0071a60[m Adding datasets in data folder
+[33mac9aa62[m Setting up requirements.txt file
+[33me5d9efc[m Initial commit

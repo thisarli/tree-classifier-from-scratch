@@ -63,6 +63,57 @@ def pruning(tree, validation_set):
     return get_tree_from_dict(tree_copy), pruned_tree_depth
 
 
+def alternative_pruning(tree, validation_set):
+    """
+    Args:
+      tree (dict {id : Node})
+      validation_set (np.array) including class labels
+  """
+    tree_copy = copy.deepcopy(tree)
+    node_tree = get_tree_from_dict(tree_copy)
+    predictions = predict(validation_set[:, :-1], node_tree)
+    labels = validation_set[:, -1]
+    original_accuracy = accuracy(labels, predictions)
+
+    leaves_id = [node_id for node_id in tree if tree[node_id].label is not None]
+    candidates = [node for node in tree.values() if ((node.left in leaves_id) and (node.right in leaves_id))]
+    
+    while len(candidates) > 0:
+        candidate = candidates[0]
+        update_to_leaf_node(tree, candidate)
+        tree_copy_can = copy.deepcopy(tree)
+        node_tree = get_tree_from_dict(tree_copy_can)
+        new_predictions = predict(validation_set[:, :-1], node_tree)  # THIS SUPPOSES THAT tree IS NOW A Node
+        pruned_accuracy = accuracy(new_predictions, labels)
+        # If a single leaf reduces the validation error, then the node in pruned and replaced by a single leaf.
+        if pruned_accuracy > original_accuracy:
+            update_to_leaf_node(tree, candidate)
+
+            # Update original accuracy to accuracy of pruned tree
+            original_accuracy = pruned_accuracy
+
+            # Remove children of best_candidate from tree
+            del tree[candidate.left]
+            del tree[candidate.right]
+            tree[candidate.id].right = None
+            tree[candidate.id].left = None
+
+            # Update leaves_id and candidates
+            leaves_id = [node_id for node_id in tree if tree[node_id].label is not None]
+            candidates = [node for node in tree.values() if ((node.left in leaves_id) and (node.right in leaves_id))]
+        
+        else :
+            # we restore the node if the validation accuracy didn't improve with pruning
+            tree[candidate.id].label = None
+            tree[candidate.id].count = None
+
+        candidates.pop(0)
+
+    pruned_tree_depth = get_depth(tree)
+    tree_copy = copy.deepcopy(tree)
+
+    return get_tree_from_dict(tree_copy), pruned_tree_depth
+
 def get_depth(tree):
     max_depth = 0
     for node_id, node in tree.items():
@@ -136,7 +187,7 @@ def nested_cv_for_pruning(dataset, n_fold):
             inner_original_accuracies.append(accuracy(test_ds[:, -1], predictions_original_tree))
             original_depths += [original_depth]
             trained_tree = get_node_dict_from_tree(trained_tree)
-            pruned_tree, pruned_tree_depth = pruning(trained_tree, val_ds)
+            pruned_tree, pruned_tree_depth = alternative_pruning(trained_tree, val_ds)
             inner_pruned_depths += [pruned_tree_depth]
             predictions_pruned_tree = predict(test_ds[:, :-1], pruned_tree)
             inner_pruned_accuracies.append(accuracy(test_ds[:, -1], predictions_pruned_tree))
