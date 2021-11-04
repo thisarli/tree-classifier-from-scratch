@@ -114,6 +114,7 @@ def alternative_pruning(tree, validation_set):
 
     return get_tree_from_dict(tree_copy), pruned_tree_depth
 
+
 def get_depth(tree):
     max_depth = 0
     for node_id, node in tree.items():
@@ -164,8 +165,8 @@ def nested_cv_for_pruning(dataset, n_fold):
     
     Returns: 
         a tuple of two nested list (original_tree_output, pruned_tree_output). 
-        the first list has all averaged metrics for original dicision tree; 
-        the second list has all averaged metrics for all prunned trees
+        the first list has all averaged metrics for original decision tree;
+        the second list has all averaged metrics for all pruned trees
 
         Each list has the following metrics (in order): [accuracy, depth, confusion matrix, recall, precision, f1]
 
@@ -179,7 +180,7 @@ def nested_cv_for_pruning(dataset, n_fold):
     original_depths = []
     outer_pruned_depths = []
 
-    # metrics of all repeats trained below (should have 100 models in total because 10X10)
+    # metrics of all repeats trained below
     f1_pruned = []
     conf_matrix_pruned = []
     recall_pruned = []
@@ -223,10 +224,10 @@ def nested_cv_for_pruning(dataset, n_fold):
             recall_original += [recall(y_gold, predictions_original_tree)]
             precision_original += [precision(y_gold, predictions_original_tree)]
 
-            # prunned tree
+            # pruned tree
             print('>>> training the pruned tree ...')
             trained_tree = get_node_dict_from_tree(trained_tree)
-            pruned_tree, pruned_tree_depth = alternative_pruning(trained_tree, val_ds)
+            pruned_tree, pruned_tree_depth = pruning(trained_tree, val_ds)
             inner_pruned_depths += [pruned_tree_depth]
             predictions_pruned_tree = predict(test_ds[:, :-1], pruned_tree)
 
@@ -235,24 +236,17 @@ def nested_cv_for_pruning(dataset, n_fold):
             conf_matrix_pruned += [confusion_matrix(y_gold, predictions_pruned_tree)]
             recall_pruned += [recall(y_gold, predictions_pruned_tree)]
             precision_pruned += [precision(y_gold, predictions_pruned_tree)]
-            print('precision_pruned', precision_pruned)
-
 
         outer_pruned_accuracies.append(np.mean(inner_pruned_accuracies))
         outer_original_accuracies.append(np.mean(inner_original_accuracies))
         outer_pruned_depths += [np.mean(inner_pruned_depths)]
-        print('----pruned data ---')
-        print(outer_pruned_accuracies, outer_pruned_depths, conf_matrix_pruned, recall_pruned, precision_pruned, f1_pruned)
-        print('----unpruned data ---')
-        print(outer_original_accuracies, original_depths, conf_matrix_original, recall_original, precision_original, f1_original)
-
-
 
     pruned_tree_output = [np.mean(outer_pruned_accuracies), np.mean(outer_pruned_depths),
                             np.mean(conf_matrix_pruned, axis=0), np.mean(recall_pruned, axis=0), 
                             np.mean(precision_pruned, axis=0), np.mean(f1_pruned, axis=0)]
     original_tree_output = [np.mean(outer_original_accuracies), np.mean(original_depths),
                             np.mean(conf_matrix_original, axis=0), np.mean(recall_original, axis=0),
-                            np.mean(precision_original, axis=0), np.mean(f1_original, axis=0) ]
+                            np.mean(precision_original, axis=0), np.mean(f1_original, axis=0)]
+    print("Here are the results:")
 
-    return (original_tree_output, pruned_tree_output)
+    return original_tree_output, pruned_tree_output
