@@ -3,7 +3,7 @@ import copy
 import numpy as np
 
 from DecisionTreeBuilder import DecisionTreeBuilder
-from metrics import predict, accuracy
+from metrics import predict, accuracy, f1_score, recall, precision, confusion_matrix
 from tree_utils import get_tree_from_dict, train_test_k_fold, get_node_dict_from_tree
 
 
@@ -156,6 +156,21 @@ def update_to_leaf_node(tree, node):
 def nested_cv_for_pruning(dataset, n_fold):
     """
     Runs the nested cross-validation to get the mean accuracy for the ID3-pruning algorithm
+
+    Arg:
+        dataset(array): each row is an instance, each column in the value for one feature. 
+                        the last column in the class for this instance
+        n_fold(int): number of folds this cross validation will implement 
+    
+    Returns: 
+        a tuple of two nested list (original_tree_output, pruned_tree_output). 
+        the first list has all averaged metrics for original dicision tree; 
+        the second list has all averaged metrics for all prunned trees
+
+        Each list has the following metrics (in order): [accuracy, depth, confusion matrix, recall, precision, f1]
+
+        for recall, precision, f1, each of them is a (1, 4) list, each element corresponds to each room given in the question
+
     """
     # return the index of outer cross validation
     outer_folds = train_test_k_fold(n_fold, len(dataset))
@@ -163,6 +178,18 @@ def nested_cv_for_pruning(dataset, n_fold):
     outer_pruned_accuracies = []
     original_depths = []
     outer_pruned_depths = []
+
+    # metrics of all repeats trained below (should have 100 models in total because 10X10)
+    f1_pruned = []
+    conf_matrix_pruned = []
+    recall_pruned = []
+    precision_pruned = []
+
+    f1_original = []
+    conf_matrix_original = []
+    recall_original = []
+    precision_original = []
+
     for i, outer_fold in enumerate(outer_folds):
         print(f'============Nest CV Outer={i}=============')
         test_index = outer_fold[1]
@@ -174,27 +201,58 @@ def nested_cv_for_pruning(dataset, n_fold):
         inner_pruned_accuracies = []
         inner_original_accuracies = []
         inner_pruned_depths = []
+        
         for i, inner_fold in enumerate(inner_folds):
             print(f'---------------Nest CV Inner-{i}---------------')
             val_index = inner_fold[1]
             train_index = inner_fold[0]
             val_ds = train_val_ds[val_index]
             train_ds = train_val_ds[train_index]
-
+            y_gold = test_ds[:, -1]
+            
+            # unpruned tree
+            print('>>> training the unpruned tree ...')
             decisiontree = DecisionTreeBuilder()
             trained_tree, original_depth = decisiontree.build(train_ds)
             predictions_original_tree = predict(test_ds[:, :-1], trained_tree)
-            inner_original_accuracies.append(accuracy(test_ds[:, -1], predictions_original_tree))
+            
+            inner_original_accuracies.append(accuracy(y_gold, predictions_original_tree))
             original_depths += [original_depth]
+            f1_original += [f1_score(y_gold, predictions_original_tree)]
+            conf_matrix_original += [confusion_matrix(y_gold, predictions_original_tree)]
+            recall_original += [recall(y_gold, predictions_original_tree)]
+            precision_original += [precision(y_gold, predictions_original_tree)]
+
+            # prunned tree
+            print('>>> training the pruned tree ...')
             trained_tree = get_node_dict_from_tree(trained_tree)
             pruned_tree, pruned_tree_depth = alternative_pruning(trained_tree, val_ds)
             inner_pruned_depths += [pruned_tree_depth]
             predictions_pruned_tree = predict(test_ds[:, :-1], pruned_tree)
+
             inner_pruned_accuracies.append(accuracy(test_ds[:, -1], predictions_pruned_tree))
+            f1_pruned += [f1_score(y_gold, predictions_pruned_tree)]
+            conf_matrix_pruned += [confusion_matrix(y_gold, predictions_pruned_tree)]
+            recall_pruned += [recall(y_gold, predictions_pruned_tree)]
+            precision_pruned += [precision(y_gold, predictions_pruned_tree)]
+            print('precision_pruned', precision_pruned)
+
 
         outer_pruned_accuracies.append(np.mean(inner_pruned_accuracies))
-        outer_pruned_depths += [np.mean(inner_pruned_depths)]
         outer_original_accuracies.append(np.mean(inner_original_accuracies))
+        outer_pruned_depths += [np.mean(inner_pruned_depths)]
+        print('----pruned data ---')
+        print(outer_pruned_accuracies, outer_pruned_depths, conf_matrix_pruned, recall_pruned, precision_pruned, f1_pruned)
+        print('----unpruned data ---')
+        print(outer_original_accuracies, original_depths, conf_matrix_original, recall_original, precision_original, f1_original)
 
-    return np.mean(outer_original_accuracies), np.mean(outer_pruned_accuracies), np.mean(original_depths), \
-           np.mean(outer_pruned_depths)
+
+
+    pruned_tree_output = [np.mean(outer_pruned_accuracies), np.mean(outer_pruned_depths),
+                            np.mean(conf_matrix_pruned, axis=0), np.mean(recall_pruned, axis=0), 
+                            np.mean(precision_pruned, axis=0), np.mean(f1_pruned, axis=0)]
+    original_tree_output = [np.mean(outer_original_accuracies), np.mean(original_depths),
+                            np.mean(conf_matrix_original, axis=0), np.mean(recall_original, axis=0),
+                            np.mean(precision_original, axis=0), np.mean(f1_original, axis=0) ]
+
+    return (original_tree_output, pruned_tree_output)

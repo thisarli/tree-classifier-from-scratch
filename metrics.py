@@ -1,5 +1,4 @@
 import numpy as np
-
 from tree_utils import traverse
 
 
@@ -77,10 +76,9 @@ def precision(y_gold, y_prediction):
         y_prediction (np.ndarray): the predicted labels
 
     Returns:
-        tuple: returns a tuple (precisions, macro_precision) where
+        tuple: returns precisions where
             - precisions is a np.ndarray of shape (C,), where each element is the
               precision for class c
-            - macro-precision is macro-averaged precision (a float)
     """
 
     confusion = confusion_matrix(y_gold, y_prediction)
