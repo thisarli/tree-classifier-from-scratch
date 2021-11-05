@@ -3,6 +3,13 @@ from tree_utils import traverse
 
 
 def predict(x_test, tree):
+    """
+    Classifies the passed datapoints.
+
+    :param x_test: feature values of the datapoints (np.array)
+    :param tree: the tree used to evaluate the datapoints (Node)
+    :return: class label predictions for each datapoint (np.array)
+    """
     y_pred = []
     for instance in x_test:
         y_pred.append(traverse(instance, tree))
@@ -86,12 +93,6 @@ def precision(y_gold, y_prediction):
     for c in range(confusion.shape[0]):
         if np.sum(confusion[:, c]) > 0:
             p[c] = confusion[c, c] / np.sum(confusion[:, c])
-
-    # # Compute the macro-averaged precision
-    # macro_p = 0.
-    # if len(p) > 0:
-    #     macro_p = np.mean(p)
-
     return p
 
 
@@ -116,12 +117,6 @@ def recall(y_gold, y_prediction):
     for c in range(confusion.shape[0]):
         if np.sum(confusion[c, :]) > 0:
             r[c] = confusion[c, c] / np.sum(confusion[c, :])
-
-    # # Compute the macro-averaged recall
-    # macro_r = 0.
-    # if len(r) > 0:
-    #     macro_r = np.mean(r)
-
     return r
 
 
@@ -140,7 +135,6 @@ def f1_score(y_gold, y_prediction):
               f1-score for class c
             - macro-f1 is macro-averaged f1-score (a float)
     """
-
     precisions = precision(y_gold, y_prediction)
     recalls = recall(y_gold, y_prediction)
 
@@ -151,5 +145,4 @@ def f1_score(y_gold, y_prediction):
     for c, (p, r) in enumerate(zip(precisions, recalls)):
         if p + r > 0:
             f[c] = 2 * p * r / (p + r)
-
     return f

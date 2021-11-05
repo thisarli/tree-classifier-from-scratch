@@ -9,10 +9,18 @@ from tree_utils import get_tree_from_dict, train_test_k_fold, get_node_dict_from
 
 def pruning(tree, validation_set):
     """
-    Args:
-      tree (dict {id : Node})
-      validation_set (np.array) including class labels
-  """
+    Function to prune a given tree based on a given validation dataset.
+    It finds the leaves of the tree, finds their parent nodes (pruning candidates) and executes pruning for each of
+    the pruning candidates. The resulting pruned tree with the greatest improvement in accuracy on the validation set
+    will now become the new tree, which will be pruned again (i.e. find all leaves, parent nodes as candidates, etc.).
+    The pruning stops when none of the pruned trees (i.e. for each pruning candidate) result in an improved accuracy.
+    When a branch is pruned, the new leaf node will be assigned the class label of the majority class of the datapoints
+    below.
+
+    :param tree: dict {id : Node}
+    :param validation_set: validation dataset including class labels (np.array)
+    :return: pruned tree (Node), depth of pruned tree (int)
+    """
     tree_copy = copy.deepcopy(tree)
     node_tree = get_tree_from_dict(tree_copy)
     predictions = predict(validation_set[:, :-1], node_tree)
@@ -30,8 +38,9 @@ def pruning(tree, validation_set):
             update_to_leaf_node(tree, candidate)
             tree_copy_can = copy.deepcopy(tree)
             node_tree = get_tree_from_dict(tree_copy_can)
-            new_predictions = predict(validation_set[:, :-1], node_tree)  # THIS SUPPOSES THAT tree IS NOW A Node
+            new_predictions = predict(validation_set[:, :-1], node_tree)
             pruned_accuracy = accuracy(new_predictions, labels)
+            # Add to pruning dictionary
             pruning_accuracies[candidate.id] = pruned_accuracy
             # Convert back to un-pruned tree to evaluate other pruning options against the original tree
             tree[candidate.id].label = None
@@ -65,10 +74,18 @@ def pruning(tree, validation_set):
 
 def alternative_pruning(tree, validation_set):
     """
-    Args:
-      tree (dict {id : Node})
-      validation_set (np.array) including class labels
-  """
+    Not currently used.
+
+    An alternative implementation of pruning given tree based on a given validation dataset.
+    It finds the leaves of the tree, finds their parent nodes (pruning candidates) and executes pruning for each of
+    the pruning candidates. As soon as a pruned tree leads to an improvement in accuracy on the validation set, this
+    will now become the new tree, which will be pruned again (i.e. find all leaves, parent nodes as candidates, etc.).
+    The pruning stops when none of the pruned trees (i.e. for each pruning candidate) result in an improved accuracy.
+
+    :param tree: dict {id : Node}
+    :param validation_set: validation dataset including class labels (np.array)
+    :return: pruned tree (Node), depth of pruned tree (int)
+    """
     tree_copy = copy.deepcopy(tree)
     node_tree = get_tree_from_dict(tree_copy)
     predictions = predict(validation_set[:, :-1], node_tree)
@@ -83,7 +100,7 @@ def alternative_pruning(tree, validation_set):
         update_to_leaf_node(tree, candidate)
         tree_copy_can = copy.deepcopy(tree)
         node_tree = get_tree_from_dict(tree_copy_can)
-        new_predictions = predict(validation_set[:, :-1], node_tree)  # THIS SUPPOSES THAT tree IS NOW A Node
+        new_predictions = predict(validation_set[:, :-1], node_tree)
         pruned_accuracy = accuracy(new_predictions, labels)
         # If a single leaf reduces the validation error, then the node in pruned and replaced by a single leaf.
         if pruned_accuracy > original_accuracy:
@@ -116,6 +133,12 @@ def alternative_pruning(tree, validation_set):
 
 
 def get_depth(tree):
+    """
+    Retrieves the depth of the passed tree
+
+    :param tree: tree in dictionary form (dict)
+    :return: maximum depth of the tree (int)
+    """
     max_depth = 0
     for node_id, node in tree.items():
         if node.depth > max_depth:
@@ -125,15 +148,17 @@ def get_depth(tree):
 
 def update_to_leaf_node(tree, node):
     """
-    Updates the node in the same tree dictionary to a leaf node by assigning it a majority label and
-    instance count for each class
+    Updates the node in the same tree dictionary to a leaf node by assigning it the majority label, and
+    instance count for each class.
 
-    tree (dict of Nodes)
-    node (Node)
+    :param tree: tree in dict form (dict of Nodes)
+    :param node: id of the node to be turned into a leaf node (int)
+    :return: None (just updates the passed tree)
     """
+    # Assert the passed Node is not currently a leaf node
     assert tree[node.left].label is not None and tree[node.right].label is not None
 
-    # count is a list of arrays with count[0] labels and count[1] the number of instances for each label
+    # Count is a list of arrays with count[0] the labels and count[1] the number of instances for each label
     left_count = tree[node.left].count
     right_count = tree[node.right].count
 
@@ -156,7 +181,7 @@ def update_to_leaf_node(tree, node):
 
 def nested_cv_for_pruning(dataset, n_fold):
     """
-    Runs the nested cross-validation to get the mean accuracy for the ID3-pruning algorithm
+    Runs the nested cross-validation to get the evaluation metrics for the ID3-pruning algorithm
 
     Arg:
         dataset(array): each row is an instance, each column in the value for one feature. 
@@ -170,7 +195,8 @@ def nested_cv_for_pruning(dataset, n_fold):
 
         Each list has the following metrics (in order): [accuracy, depth, confusion matrix, recall, precision, f1]
 
-        for recall, precision, f1, each of them is a (1, 4) list, each element corresponds to each room given in the question
+        for recall, precision, f1, each of them is a (1, 4) list, each element corresponds to each room given in the
+        question
 
     """
     # return the index of outer cross validation

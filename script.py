@@ -7,6 +7,12 @@ FILEPATH = "data/clean_dataset.txt"
 
 
 def run_wifi_localisation():
+    """
+    Runs the training, classification and evaluation of the dataset specified in FILEPATH.
+    Prints findings to console.
+
+    :return: None
+    """
     # Load the data
     data = load_dataset(FILEPATH)
     print(f"Loaded {FILEPATH} successfully")

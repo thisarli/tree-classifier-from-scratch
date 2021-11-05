@@ -6,11 +6,23 @@ from tree_utils import is_pure_node, find_split, split_dataset_by_split_point, t
 
 
 class DecisionTreeBuilder:
+    """
+    A class that contains all the methods required to:
+    - build a tree from a dataset
+    - make predictions for passed datapoints
+    - evaluate the performance of the tree
+    """
     def __init__(self, random_generator=default_rng()):
         self.random_generator = random_generator
         self.id_counter = 0
 
     def build(self, dataset, depth=0):
+        """
+
+        :param dataset: the dataset used for analysis (np.array)
+        :param depth: depth of the tree, defaults to 0 (int)
+        :return: tree in nested Node structure (Node), depth of the tree (int)
+        """
         attribute = None
         value = None
         if is_pure_node(dataset)[0]:
@@ -27,6 +39,13 @@ class DecisionTreeBuilder:
             return node, max(l_depth, r_depth)
 
     def predict(self, x_test, tree):
+        """
+        Classifies the passed datapoints.
+
+        :param x_test: feature values of the datapoints (np.array)
+        :param tree: the tree used to evaluate the datapoints (Node)
+        :return: class label predictions for each datapoint (np.array)
+        """
         y_pred = []
         for instance in x_test:
             y_pred.append(traverse(instance, tree))
@@ -108,12 +127,6 @@ class DecisionTreeBuilder:
         for c in range(confusion.shape[0]):
             if np.sum(confusion[:, c]) > 0:
                 p[c] = confusion[c, c] / np.sum(confusion[:, c])
-
-        # # Compute the macro-averaged precision
-        # macro_p = 0.
-        # if len(p) > 0:
-        #     macro_p = np.mean(p)
-
         return p
 
     def recall(self, y_gold, y_prediction):
@@ -137,12 +150,6 @@ class DecisionTreeBuilder:
         for c in range(confusion.shape[0]):
             if np.sum(confusion[c, :]) > 0:
                 r[c] = confusion[c, c] / np.sum(confusion[c, :])
-
-        # # Compute the macro-averaged recall
-        # macro_r = 0.
-        # if len(r) > 0:
-        #     macro_r = np.mean(r)
-
         return r
 
     def f1_score(self, y_gold, y_prediction):
@@ -164,13 +171,11 @@ class DecisionTreeBuilder:
         precisions = self.precision(y_gold, y_prediction)
         recalls = self.recall(y_gold, y_prediction)
 
-        # just to make sure they are of the same length
         assert len(precisions) == len(recalls)
 
         f = np.zeros((len(precisions),))
         for c, (p, r) in enumerate(zip(precisions, recalls)):
             if p + r > 0:
                 f[c] = 2 * p * r / (p + r)
-
         return f
 

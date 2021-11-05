@@ -6,7 +6,7 @@ from script import FILEPATH
 
 
 def plot_tree(tree):
-    plt.figure(figsize = (9,14))
+    plt.figure(figsize=(9, 14))
     ax1 = plt.axes(frameon=True)
     ax1.axes.get_xaxis().set_visible(False)
     plt.gca().invert_yaxis()

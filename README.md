@@ -1,6 +1,6 @@
 # Intro Ml Cw1
 
-To run the code, please follow the following steps:
+To run the code, please follow the below steps:
 
 - Open the project in a terminal
 - pip install requirements.txt

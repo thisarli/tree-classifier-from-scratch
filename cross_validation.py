@@ -5,6 +5,14 @@ from tree_utils import train_test_k_fold
 
 
 def run_simple_cross_validation(n_folds, data):
+    """
+    Runs simple cross validation
+
+    :param n_folds: the number of folds (int)
+    :param data: the dataset under evaluation (np.array)
+    :return: mean accuracy, mean confusion matrix, mean precision per class, mean recall per class,
+            mean f1-score per class, mean depth
+    """
     accuracies = []
     confusion_matrices = []
     precisions = []

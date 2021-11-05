@@ -1,13 +1,17 @@
 import copy
 
-import matplotlib as plt
 import numpy as np
 from numpy.random import default_rng
 
-from Node import Node
-
 
 def find_split(data):
+    """
+    Finds the best splitpoint (feature, value) for the passed data, based on maximising information gain.
+
+    :param data: the dataset to be split (np.array)
+    :return: best_split_value (value of feature at which to split, float),
+            best_split_feature (feature at which to split, int)
+    """
     # Get number of features and examples in data
     num_examples, num_features = np.shape(data[:, :-1])
 
@@ -43,10 +47,10 @@ def find_split(data):
 def split_dataset_by_split_point(dataset, attribute, value):
     """ Helper function to split a dataset by a specified split point.
 
-    :param dataset:
-    :param attribute:
-    :param value:
-    :return:
+    :param dataset: the dataset to be split (np.array)
+    :param attribute: the feature across which to split the dataset (int)
+    :param value: the value of the feature at which to split the dataset (float)
+    :return: the two sides of the split dataset (each is np.array)
     """
     sorted_dataset = dataset[np.argsort(dataset[:, attribute])]
     right_dataset = sorted_dataset[np.where(sorted_dataset[:, attribute] > value)[0]]
@@ -56,7 +60,10 @@ def split_dataset_by_split_point(dataset, attribute, value):
 
 def information_entropy(label_column):
     """
-    TODO
+    Calculate the information entropy of an array of labels
+
+    :param label_column: labels for the datapoints (np.array)
+    :return: information entropy (float)
     """
     labels, frequencies = np.unique(label_column, return_counts=True)
 
@@ -69,7 +76,12 @@ def information_entropy(label_column):
 
 def information_gain(left_child_label_column, right_child_label_column, parent_label_column):
     """
-    TODO
+    Calculate the information gain of splitting a datapoints into left and right
+
+    :param left_child_label_column: the labels of the datapoints split off to be the left child (np.array)
+    :param right_child_label_column: the labels of the datapoints split off to be the right child (np.array)
+    :param parent_label_column: the labels of all the datapoints prior to splitting (np.array)
+    :return: information gain (float)
     """
     parent_entropy = information_entropy(parent_label_column)
     left_child_entropy = information_entropy(left_child_label_column)
@@ -82,11 +94,12 @@ def information_gain(left_child_label_column, right_child_label_column, parent_l
 
 
 def is_pure_node(dataset):
-    """Implement stopping condition if either all labels in a dataset are the same, or if there are no examples
+    """
+    Implement stopping condition if either all labels in a dataset are the same, or if there are no examples
     in the dataset.
 
-    :param dataset:
-    :return:
+    :param dataset: the dataset for which we want to determine the splitpoints (np.array)
+    :return: is_pure (boolean), label (int), node_count (list)
     """
     is_pure = False
     label = None
@@ -161,6 +174,13 @@ def train_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
 
 
 def traverse(instance, tree):
+    """
+    Function to move a given datapoint (instance) down the specified tree and retrieve the classified label.
+
+    :param instance: datapoint's features (np.array)
+    :param tree: the tree used for classification (Node)
+    :return: the class label of the datapoint (instance) (int)
+    """
     node = tree
     label = node.label
     while node.label is None:
@@ -178,7 +198,10 @@ def traverse(instance, tree):
 def get_node_dict_from_tree(tree):
     """
     Retrieves a dictionary of nodes from a tree, i.e. a trained model, or output from .build() method
-    in DecisionTreeBuilder class
+    in DecisionTreeBuilder class.
+
+    :param tree: tree in Node form (Node)
+    :return: tree in dictionary form (dict)
     """
     nodes_to_process = [copy.deepcopy(tree)]
     node_dict = {}
@@ -201,6 +224,13 @@ def get_node_dict_from_tree(tree):
 
 
 def get_tree_from_dict(node_dict, node_id=1):
+    """
+    Convert a tree in dictonary form into a tree in Node form.
+
+    :param node_dict: dictionary of Nodes representing the tree (dict)
+    :param node_id: defaults to 1 (i.e. the root node)
+    :return: tree (Node)
+    """
     tree = node_dict[node_id]
     if tree.right == None and tree.left == None:
         return tree
