@@ -13,3 +13,5 @@ It prints all the required evaluation metrics to the terminal.
 "python -m plotting" will plot the tree for the dataset specified in the FILEPATH
 
 To switch the dataset, change the FILEPATH in script.py on line 6.
+
+Group project @ Imperial
